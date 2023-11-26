@@ -130,4 +130,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _roadMaterial: {fileID: 0}
   _moveSpeed: 10
-  _zScale: 19.9
+  _zScale: 19.8

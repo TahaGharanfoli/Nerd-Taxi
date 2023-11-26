@@ -6,12 +6,19 @@ using UnityEngine;
 
 public class RoadController : MonoBehaviour
 {
+   public static RoadController Instance;
    [SerializeField] private int _firstRoadCount;
    [SerializeField] private RoadBlock _roadBlockPrefab;
    [SerializeField] private List<RoadBlock> _roadBlockList = new List<RoadBlock>();
    [SerializeField] private Transform _roadBlockParent;
    [SerializeField] private float _poolingDistance;
    private RoadBlock _firstRoadBlock;
+
+   private void Awake()
+   {
+      Instance = this;
+   }
+
    private void Start()
    {
       for (int i = 0; i < _firstRoadCount; i++)
@@ -49,14 +56,13 @@ public class RoadController : MonoBehaviour
    private void CreateRoadBlock()
    {
       var tempBlock = Instantiate(_roadBlockPrefab, GetLastTargetBlock(), Quaternion.identity, _roadBlockParent);
+        tempBlock.GetComponent<RoadBlock>().Init(GameController.OnChangeGameSpeed);
        _roadBlockList.Add(tempBlock);
    }
 
-   private List<RoadBlock>[] GetRoadBlocksByIndexes(int firstIndex, int secondIndex)
+   public RoadBlock GetRoadBlockByIndex(int index)
    {
-      var roadBlock = new List<RoadBlock>();
-      roadBlock.Add(_firstRoadBlock);
-      _roadBlockList.Add(_roadBlockList[_firstRoadBlock]);
+      return _roadBlockList[index];
    }
    #region Editor
    [ContextMenu("Create Editor Road")]

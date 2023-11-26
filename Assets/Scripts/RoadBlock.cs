@@ -11,13 +11,9 @@ public class RoadBlock : MonoBehaviour
 
    public void Init(Action<float> onChangeSpeed)
    {
+       onChangeSpeed -= OnChangeSpeed;
        onChangeSpeed += OnChangeSpeed;
    }
-   private void OnRemove(Action<float> onChangeSpeed)
-   {
-       onChangeSpeed -= OnChangeSpeed;
-   }
-
    private void OnChangeSpeed(float speed)
    {
        _moveSpeed = speed;

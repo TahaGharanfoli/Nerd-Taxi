@@ -5,7 +5,17 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-
-
+    public float GameSpeed;
+    public static GameController Instance;
+    public static Action<float> OnChangeGameSpeed;
+     private void Awake()
+     {
+        Instance = this;
+     }
+     public void ChangeGameSpeed(float delta)
+     {
+         GameSpeed += delta;
+         OnChangeGameSpeed.Invoke(GameSpeed);
+     }
 
 }
