@@ -9,6 +9,11 @@ public class RoadBlock : MonoBehaviour
    [SerializeField] private float _moveSpeed;
    [SerializeField] public float _zScale;
 
+   private void Start()
+   {
+       _moveSpeed = GameController.Instance.GameSpeed;
+   }
+
    public void Init(Action<float> onChangeSpeed)
    {
        onChangeSpeed -= OnChangeSpeed;

@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,4 +12,13 @@ public class AnswerBehaviour : MonoBehaviour
         _answerText.text = $"{value}";
         _isCorrectAnswer = isCorrectAnswer;
     }
+    private void OnTriggerEnter(Collider other)
+    {
+        print("Other :   "+other.gameObject.tag);
+        // if (other.CompareTag("Vehicle"))
+        // {
+            GameController.OnFindAnswer?.Invoke(_isCorrectAnswer);
+            Destroy(transform.parent.gameObject);
+        // }
     }
+}

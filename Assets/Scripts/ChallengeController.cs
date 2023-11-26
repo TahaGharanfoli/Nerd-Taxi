@@ -1,6 +1,9 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.NetworkInformation;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -13,38 +16,74 @@ public enum Operation
 }
 public class ChallengeController : MonoBehaviour
 {
-    [SerializeField] private float _currentDelay;
+    [SerializeField] private float _currentDelay=5f;
     [SerializeField] private GameObject _answerPrefab;
     private GameObject _currentQuestion;
     [SerializeField] private QuestionBehaviour _questionBehaviour;
     private AnswerBlock _currentAnswerBlock;
     private Challenge _currentChallenge;
     private Coroutine _makeChallengeCoroutine;
-
+    private List<Challenge> _challengeQueue = new List<Challenge>();
     private void Start()
     {
+        ProvideBaseChallenges();
+        GameController.OnFindAnswer += OnFindAnswer;
+        MakeFirstQuestion(); 
         _makeChallengeCoroutine = StartCoroutine(MakeChallenge());
+    }
+
+    private void OnFindAnswer(bool isCorrect)
+    {
+        print("on find answer ");
+        if (isCorrect)
+        {
+            GameController.Instance.ChangeGameSpeed(0.3f);
+            _currentDelay -= 0.1f;
+        }
+        else
+        {
+            _currentDelay -= 0.2f;
+            GameController.Instance.ChangeGameSpeed(2);
+        }
+        ShowNextQuestion();
     }
 
     private IEnumerator MakeChallenge()
     {
-        yield return new WaitForSeconds(_currentDelay);
+        yield return new WaitForSecondsRealtime(_currentDelay);
         SetChallenge();
         if(_makeChallengeCoroutine!=null) StopCoroutine(_makeChallengeCoroutine);
         _makeChallengeCoroutine=StartCoroutine(MakeChallenge());
     }
-    private void RemoveChallenge()
+    private void ShowNextQuestion()
     {
-        Destroy(_currentQuestion);
-        Destroy(_currentAnswerBlock.gameObject);
+        _questionBehaviour.Set();
+    }
+    private void MakeFirstQuestion()
+    {
+        _currentChallenge = _challengeQueue.First();
+        CreateAnswer(_currentChallenge);
+        _questionBehaviour.Set(_currentChallenge);
     }
 
+    private void ProvideBaseChallenges()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+               _currentChallenge = new Challenge();
+               _challengeQueue.Add(_currentChallenge);
+        }
+    }
     private void SetChallenge()
     {
-        if(_currentAnswerBlock!=null) Destroy(_currentAnswerBlock.gameObject); 
-        _currentChallenge = new Challenge();
-        _questionBehaviour.Init(_currentChallenge.Operation,_currentChallenge.FirstNumber,_currentChallenge.SecondNumber); 
-         CreateAnswer(_currentChallenge);
+        if (_challengeQueue.Count < 10)
+        {
+            _currentChallenge = new Challenge();
+            _challengeQueue.Add(_currentChallenge);
+        }
+
+        _challengeQueue.Remove(_challengeQueue.First());
+        CreateAnswer();
     }
 
     private void CreateAnswer(Challenge challenge)

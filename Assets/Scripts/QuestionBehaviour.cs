@@ -5,9 +5,9 @@
    public class QuestionBehaviour : MonoBehaviour
    {
        [SerializeField] private TextMeshPro _questionText;
-        public void Init(Operation operation, int firstNumber ,int secondNumber)
+        public void Set(ChallengeController.Challenge challenge)
         {
-            _questionText.text = $"{firstNumber}  {GetOperationSign(operation)}  {secondNumber}";
+            _questionText.text = $"{challenge.FirstNumber}  {GetOperationSign(challenge.Operation)}  {challenge.SecondNumber}";
         }
 
         private string GetOperationSign(Operation operation)

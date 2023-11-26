@@ -8,6 +8,7 @@ public class GameController : MonoBehaviour
     public float GameSpeed;
     public static GameController Instance;
     public static Action<float> OnChangeGameSpeed;
+    public static Action<bool> OnFindAnswer;
      private void Awake()
      {
         Instance = this;
@@ -15,7 +16,7 @@ public class GameController : MonoBehaviour
      public void ChangeGameSpeed(float delta)
      {
          GameSpeed += delta;
-         OnChangeGameSpeed.Invoke(GameSpeed);
+         OnChangeGameSpeed?.Invoke(GameSpeed);
      }
 
 }
