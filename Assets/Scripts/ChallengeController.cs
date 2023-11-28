@@ -23,7 +23,8 @@ public class ChallengeController : MonoBehaviour
     private AnswerBlock _currentAnswerBlock;
     private Challenge _currentChallenge;
     private Coroutine _makeChallengeCoroutine;
-    private List<Challenge> _challengeQueue = new List<Challenge>();
+    private Queue<Challenge> _answerQueue = new Queue<Challenge>();
+    private Queue<Challenge> _questionQueue = new Queue<Challenge>();
     private void Start()
     {
         ProvideBaseChallenges();
@@ -57,11 +58,14 @@ public class ChallengeController : MonoBehaviour
     }
     private void ShowNextQuestion()
     {
-        _questionBehaviour.Set();
+        if (_questionQueue.Count > 0)
+        {
+            _questionBehaviour.Set(_questionQueue.Dequeue());
+        }
     }
     private void MakeFirstQuestion()
     {
-        _currentChallenge = _challengeQueue.First();
+        _currentChallenge = _answerQueue.Dequeue();
         CreateAnswer(_currentChallenge);
         _questionBehaviour.Set(_currentChallenge);
     }
@@ -71,19 +75,20 @@ public class ChallengeController : MonoBehaviour
         for (int i = 0; i < 10; i++)
         {
                _currentChallenge = new Challenge();
-               _challengeQueue.Add(_currentChallenge);
+               _answerQueue.Enqueue(_currentChallenge);
         }
     }
     private void SetChallenge()
     {
-        if (_challengeQueue.Count < 10)
+        if (_answerQueue.Count < 10)
         {
             _currentChallenge = new Challenge();
-            _challengeQueue.Add(_currentChallenge);
+            _answerQueue.Enqueue(_currentChallenge);
         }
 
-        _challengeQueue.Remove(_challengeQueue.First());
-        CreateAnswer();
+        var challenge = _answerQueue.Dequeue();
+        _questionQueue.Enqueue(challenge);
+        CreateAnswer(challenge);
     }
 
     private void CreateAnswer(Challenge challenge)

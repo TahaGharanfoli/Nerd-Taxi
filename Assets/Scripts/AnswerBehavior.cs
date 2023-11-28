@@ -14,11 +14,7 @@ public class AnswerBehaviour : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        print("Other :   "+other.gameObject.tag);
-        // if (other.CompareTag("Vehicle"))
-        // {
-            GameController.OnFindAnswer?.Invoke(_isCorrectAnswer);
+        GameController.OnFindAnswer?.Invoke(_isCorrectAnswer);
             Destroy(transform.parent.gameObject);
-        // }
     }
 }

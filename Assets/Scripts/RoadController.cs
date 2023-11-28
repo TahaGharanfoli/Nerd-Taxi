@@ -56,7 +56,7 @@ public class RoadController : MonoBehaviour
    private void CreateRoadBlock()
    {
       var tempBlock = Instantiate(_roadBlockPrefab, GetLastTargetBlock(), Quaternion.identity, _roadBlockParent);
-        tempBlock.GetComponent<RoadBlock>().Init(GameController.OnChangeGameSpeed);
+        tempBlock.GetComponent<RoadBlock>().Init();
        _roadBlockList.Add(tempBlock);
    }
 
@@ -73,5 +73,11 @@ public class RoadController : MonoBehaviour
          CreateRoadBlock();
       }
    }
+
+   // private void OnTriggerEnter(Collider other)
+   // {
+   //    ResetRoadBlock(_firstRoadBlock);
+   // }
+
    #endregion
 }
