@@ -8,27 +8,74 @@ using UnityEngine.UI;
 public class ViewController : MonoBehaviour
 {
     [SerializeField] private Text _scoreText;
+    [SerializeField] private Image _healthImage;
+    [SerializeField] private Slider _distanceSlider;
     private int ScoreValue = 0;
-    private void Start()
+    private float _healthValue = 1;
+    [SerializeField] private Transform _currentTargetQuestion;
+    private float _mainDistance;
+    private Queue<Transform> _questionTransformQueue=new Queue<Transform>();
+    
+    private void OnEnable()
     {
         GameController.OnFindAnswer += OnFindAnswer;
+    }
+    private void OnDisable()
+    {
+        GameController.OnFindAnswer -= OnFindAnswer;
+    }
+
+    public void InitFirst()
+    {
+        _currentTargetQuestion = _questionTransformQueue.Dequeue();
+        _mainDistance = _currentTargetQuestion.position.z;
     }
 
     private void OnFindAnswer(bool isCorrect)
     {
+        // if (isCorrect)
+        // {
+        //     ScoreValue += 100;
+        // }
+        // else
+        // {
+        //     if (ScoreValue - 70 < 0) ScoreValue = 0;
+        //     else
+        //     {
+        //         ScoreValue -= 70;
+        //     }
+        // }
+        _currentTargetQuestion = _questionTransformQueue.Dequeue();
+        _mainDistance = _currentTargetQuestion.position.z;
         if (isCorrect)
         {
-            ScoreValue += 100;
+            ScoreValue++;
+            _scoreText.text = $"{ScoreValue}";
+            _healthValue += 0.1f;
+            _healthImage.fillAmount = _healthValue;
         }
         else
         {
-            if (ScoreValue - 70 < 0) ScoreValue = 0;
-            else
+            _healthValue -= 0.3f;
+            _healthImage.fillAmount = _healthValue;
+            if (_healthValue <= 0)
             {
-                ScoreValue -= 70;
+                Time.timeScale = 0;
             }
+            
         }
+    }
 
-        _scoreText.text = $"Score : {ScoreValue}";
+    private void Update()
+    {
+        if (_currentTargetQuestion!=null)
+        {
+            _distanceSlider.value = ((_currentTargetQuestion.position.z)/_mainDistance);
+        }   
+    }
+
+    public void AddAnswerQueue(Transform transform)
+    {
+        _questionTransformQueue.Enqueue(transform);
     }
 }

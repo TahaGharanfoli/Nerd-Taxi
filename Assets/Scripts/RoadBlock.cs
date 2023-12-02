@@ -9,13 +9,18 @@ public class RoadBlock : MonoBehaviour
     [SerializeField] private Material _roadMaterial;
    [SerializeField] private float _moveSpeed;
    [SerializeField] public float _zScale;
-   
-
    private void OnEnable()
    {
+       if (GameController.Instance!=null)
+       {
+           _moveSpeed = GameController.Instance.GameSpeed;
+           GameController.OnChangeGameSpeed += OnChangeSpeed;
+       }
+   }
+
+   private void Start()
+   {
        _moveSpeed = GameController.Instance.GameSpeed;
-       // GameController.OnChangeGameSpeed -= OnChangeSpeed;
-       GameController.OnChangeGameSpeed += OnChangeSpeed;
    }
 
    private void OnDisable()

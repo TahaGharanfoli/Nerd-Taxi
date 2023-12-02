@@ -5,12 +5,14 @@ using UnityEngine.UI;
 
 public class AnswerBehaviour : MonoBehaviour
 {
-    [SerializeField] private TextMeshPro _answerText;
+    [SerializeField] private SpriteRenderer _spriteRenderer;
+    [SerializeField] private TextMeshPro _text;
     private bool _isCorrectAnswer;
-    public void Init(int value,bool isCorrectAnswer)
+    public void Init(Sprite sprite,bool isCorrectAnswer)
     {
-        _answerText.text = $"{value}";
+        _spriteRenderer.sprite = sprite;
         _isCorrectAnswer = isCorrectAnswer;
+        _text.text = "" + isCorrectAnswer;
     }
     private void OnTriggerEnter(Collider other)
     {

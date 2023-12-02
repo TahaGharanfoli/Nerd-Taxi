@@ -7,7 +7,7 @@
        [SerializeField] private TextMeshPro _questionText;
         public void Set(ChallengeController.Challenge challenge)
         {
-            _questionText.text = $"{challenge.FirstNumber}  {GetOperationSign(challenge.Operation)}  {challenge.SecondNumber}";
+            _questionText.text = $"{challenge.FirstNumber}  {GetOperationSign(challenge.Operation)}  {challenge.SecondNumber} = {challenge.Answer} ";
         }
 
         private string GetOperationSign(Operation operation)

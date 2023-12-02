@@ -16,7 +16,7 @@ public enum Operation
 }
 public class ChallengeController : MonoBehaviour
 {
-    [SerializeField] private float _currentDelay=5f;
+    [SerializeField] private float _currentDelay=7f;
     [SerializeField] private GameObject _answerPrefab;
     private GameObject _currentQuestion;
     [SerializeField] private QuestionBehaviour _questionBehaviour;
@@ -25,17 +25,21 @@ public class ChallengeController : MonoBehaviour
     private Coroutine _makeChallengeCoroutine;
     private Queue<Challenge> _answerQueue = new Queue<Challenge>();
     private Queue<Challenge> _questionQueue = new Queue<Challenge>();
+    private ViewController _viewController;
+    
     private void Start()
     {
+        _viewController=GetComponent<ViewController>();
         ProvideBaseChallenges();
         GameController.OnFindAnswer += OnFindAnswer;
         MakeFirstQuestion(); 
         _makeChallengeCoroutine = StartCoroutine(MakeChallenge());
+        _viewController.InitFirst();
     }
 
     private void OnFindAnswer(bool isCorrect)
     {
-        print("on find answer ");
+        // print("on find answer ");
         if (isCorrect)
         {
             GameController.Instance.ChangeGameSpeed(0.3f);
@@ -49,13 +53,14 @@ public class ChallengeController : MonoBehaviour
         ShowNextQuestion();
     }
 
-    private IEnumerator MakeChallenge()
-    {
-        yield return new WaitForSecondsRealtime(_currentDelay);
-        SetChallenge();
-        if(_makeChallengeCoroutine!=null) StopCoroutine(_makeChallengeCoroutine);
-        _makeChallengeCoroutine=StartCoroutine(MakeChallenge());
-    }
+    // private IEnumerator MakeChallenge()
+    // {
+    //     yield return new WaitForSecondsRealtime(_currentDelay);
+    //     SetChallenge();
+    //     print("Makeeeeeeeeeeeeeeee challenge ");
+    //     if(_makeChallengeCoroutine!=null) StopCoroutine(_makeChallengeCoroutine);
+    //     _makeChallengeCoroutine=StartCoroutine(MakeChallenge());
+    // }
     private void ShowNextQuestion()
     {
         if (_questionQueue.Count > 0)
@@ -68,6 +73,16 @@ public class ChallengeController : MonoBehaviour
         _currentChallenge = _answerQueue.Dequeue();
         CreateAnswer(_currentChallenge);
         _questionBehaviour.Set(_currentChallenge);
+    }
+
+    private void CreateBaseQuestions()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            _currentChallenge = _answerQueue.Dequeue();
+            CreateAnswer(_currentChallenge);
+            _questionBehaviour.Set(_currentChallenge);
+        }
     }
 
     private void ProvideBaseChallenges()
@@ -90,51 +105,65 @@ public class ChallengeController : MonoBehaviour
         _questionQueue.Enqueue(challenge);
         CreateAnswer(challenge);
     }
-
-    private void CreateAnswer(Challenge challenge)
+    private void CreateAnswer(Challenge challenge,int roadBlockIndex)
     {
-        var answerRoadBlock = RoadController.Instance.GetRoadBlockByIndex(7);
+        var answerRoadBlock = RoadController.Instance.GetRoadBlockByIndex(5);
         Vector3 centerBlockPosition = answerRoadBlock.transform.position;
         centerBlockPosition.z+=(answerRoadBlock._zScale / 2);
         _currentAnswerBlock=Instantiate(_answerPrefab, centerBlockPosition, Quaternion.identity).GetComponent<AnswerBlock>();
         _currentAnswerBlock.Init(challenge);
         _currentAnswerBlock.transform.SetParent(answerRoadBlock.transform);
+       _viewController.AddAnswerQueue(_currentAnswerBlock.transform);
     }
-
+    
     //[Serializable]
     public class Challenge
     {
         public Operation Operation;
         public int FirstNumber,SecondNumber;
-        public int CorrectAnswer;
-        public int WrongAnswer;
+        public int Answer;
+        public bool IsCorrectAnswer;
 
         public Challenge ()
         {
             Operation=(Operation)Random.Range(0, 4);
             FirstNumber = Random.Range(0, 101);
             SecondNumber = Random.Range(0, 101);
-            CorrectAnswer = GenerateRightAnswer(Operation, FirstNumber, SecondNumber);
-            WrongAnswer =
-                GenerateWrongAnswer((Operation)Random.Range(0, 4), Random.Range(0, 101), Random.Range(0, 101));
+            if (Random.Range(0, 2) == 0)
+            {
+                Answer = GenerateCorrectAnswer(Operation, FirstNumber, SecondNumber);
+                IsCorrectAnswer = true;
+            }
+            else
+            {
+                Answer=GenerateWrongAnswer((Operation)Random.Range(0, 4), Random.Range(0, 101), Random.Range(0, 101));
+                IsCorrectAnswer = false;
+            }
         }
 
-        private int GenerateRightAnswer(Operation operation, int firstNumber, int secondNumber)
+        private int GenerateCorrectAnswer(Operation operation, int firstNumber, int secondNumber)
         {
             switch (operation)
             {
                 case Operation.Sum:
                     return firstNumber + secondNumber;
-                break;
+                    break;
                 case Operation.Subtraction:
                     return firstNumber - secondNumber;
-                break;
+                    break;
                 case Operation.Multiply:
                     return firstNumber * secondNumber;
-                break;
+                    break;
                 case Operation.Division:
-                    return firstNumber / secondNumber;
-                break;
+                {
+                    if (firstNumber > secondNumber)
+                    {
+                        return firstNumber / secondNumber;
+                    }
+
+                    return firstNumber + secondNumber;
+                }
+                    break;
                 default:
                     return 0;
                 break;
