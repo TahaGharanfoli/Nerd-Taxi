@@ -20,20 +20,21 @@ public class ChallengeController : MonoBehaviour
     [SerializeField] private GameObject _answerPrefab;
     private GameObject _currentQuestion;
     [SerializeField] private QuestionBehaviour _questionBehaviour;
+    [SerializeField] private float _maxAnswerDistance;
     private AnswerBlock _currentAnswerBlock;
     private Challenge _currentChallenge;
     private Coroutine _makeChallengeCoroutine;
     private Queue<Challenge> _answerQueue = new Queue<Challenge>();
     private Queue<Challenge> _questionQueue = new Queue<Challenge>();
     private ViewController _viewController;
-    
+    private Queue<AnswerBlock> _answerBlockQueue = new Queue<AnswerBlock>();
+    private int _lastAnswerRoadBlockIndex;
     private void Start()
     {
         _viewController=GetComponent<ViewController>();
-        ProvideBaseChallenges();
         GameController.OnFindAnswer += OnFindAnswer;
-        MakeFirstQuestion(); 
-        _makeChallengeCoroutine = StartCoroutine(MakeChallenge());
+        ProvideBaseChallenges();
+        CreateBaseAnswers();
         _viewController.InitFirst();
     }
 
@@ -51,6 +52,7 @@ public class ChallengeController : MonoBehaviour
             GameController.Instance.ChangeGameSpeed(2);
         }
         ShowNextQuestion();
+        SetChallenge();
     }
 
     // private IEnumerator MakeChallenge()
@@ -68,21 +70,22 @@ public class ChallengeController : MonoBehaviour
             _questionBehaviour.Set(_questionQueue.Dequeue());
         }
     }
-    private void MakeFirstQuestion()
-    {
-        _currentChallenge = _answerQueue.Dequeue();
-        CreateAnswer(_currentChallenge);
-        _questionBehaviour.Set(_currentChallenge);
-    }
+    // private void MakeFirstChallenge()
+    // {
+    //     _questionBehaviour.Set(_currentChallenge);
+    // }
 
-    private void CreateBaseQuestions()
+    private void CreateBaseAnswers()
     {
-        for (int i = 0; i < 5; i++)
+        int index = 3;
+        for (int i = 0; i < 3; i++)
         {
             _currentChallenge = _answerQueue.Dequeue();
-            CreateAnswer(_currentChallenge);
-            _questionBehaviour.Set(_currentChallenge);
+             CreateAnswer(_currentChallenge,index);
+             index += 2;
+             _questionQueue.Enqueue(_currentChallenge);
         }
+        _questionBehaviour.Set(_questionQueue.Dequeue());
     }
 
     private void ProvideBaseChallenges()
@@ -95,25 +98,32 @@ public class ChallengeController : MonoBehaviour
     }
     private void SetChallenge()
     {
+        _answerBlockQueue.Dequeue();
         if (_answerQueue.Count < 10)
         {
             _currentChallenge = new Challenge();
             _answerQueue.Enqueue(_currentChallenge);
         }
-
+        
         var challenge = _answerQueue.Dequeue();
+        if (_answerBlockQueue.Count<3)
+        {
+         CreateAnswer(challenge,7);   
+        }
         _questionQueue.Enqueue(challenge);
-        CreateAnswer(challenge);
+         // CreateAnswer(challenge);
     }
     private void CreateAnswer(Challenge challenge,int roadBlockIndex)
     {
-        var answerRoadBlock = RoadController.Instance.GetRoadBlockByIndex(5);
+        var answerRoadBlock = RoadController.Instance.GetRoadBlockByIndex(roadBlockIndex);
         Vector3 centerBlockPosition = answerRoadBlock.transform.position;
         centerBlockPosition.z+=(answerRoadBlock._zScale / 2);
         _currentAnswerBlock=Instantiate(_answerPrefab, centerBlockPosition, Quaternion.identity).GetComponent<AnswerBlock>();
+        _answerBlockQueue.Enqueue(_currentAnswerBlock);
         _currentAnswerBlock.Init(challenge);
         _currentAnswerBlock.transform.SetParent(answerRoadBlock.transform);
        _viewController.AddAnswerQueue(_currentAnswerBlock.transform);
+       _lastAnswerRoadBlockIndex = roadBlockIndex;
     }
     
     //[Serializable]

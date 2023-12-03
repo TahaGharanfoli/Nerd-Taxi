@@ -15,9 +15,8 @@ public class GameController : MonoBehaviour
      }
      public void ChangeGameSpeed(float delta)
      {
-         GameSpeed += delta;
-         print("Game Speed :  "+GameSpeed);
-         OnChangeGameSpeed?.Invoke(GameSpeed);
+         // GameSpeed += delta;
+         // print("Game Speed :  "+GameSpeed);
+         // OnChangeGameSpeed?.Invoke(GameSpeed);
      }
-
 }

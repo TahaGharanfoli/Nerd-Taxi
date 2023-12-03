@@ -10,7 +10,7 @@ public class AnswerBlock : MonoBehaviour
     [SerializeField] private AnswerBehaviour[] _answers;
     public void Init(ChallengeController.Challenge challenge)
     {
-        // _question.text = $"{challenge.FirstNumber} {challenge.Operation}  {challenge.SecondNumber}";
+         _question.text = $"{challenge.FirstNumber} {challenge.Operation}  {challenge.SecondNumber}";
         if (challenge.IsCorrectAnswer)
         {
             if (Random.Range(0,2)==0)
