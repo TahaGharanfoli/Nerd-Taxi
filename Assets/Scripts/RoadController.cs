@@ -18,7 +18,6 @@ public class RoadController : MonoBehaviour
    {
       Instance = this;
    }
-
    private void Start()
    {
       for (int i = 0; i < _firstRoadCount; i++)
