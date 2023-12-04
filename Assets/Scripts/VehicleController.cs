@@ -22,11 +22,14 @@ public class VehicleController : MonoBehaviour
     }
     private void Update()
     {
-       SetInputTurn();
+#if UNITY_EDITOR
+        SetInputTurn();
+#endif
        MoveCar();
     }
     private void SetInputTurn()
     {
+        
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
             _changeTarget = true;
@@ -44,6 +47,22 @@ public class VehicleController : MonoBehaviour
         }
 
         
+    }
+
+    public void OnClickLeft()
+    {
+        _changeTarget = true;
+        _target = _leftTarget;
+        _startTime = Time.time;
+        _currentPosition = _vehicle.transform.position;
+    }
+
+    public void OnClickRight()
+    {
+        _changeTarget = true;
+        _target = _rightTarget;
+        _startTime = Time.time;
+        _currentPosition = _vehicle.transform.position;
     }
     private void MoveCar()
     {

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Random = System.Random;
 
 public class RoadController : MonoBehaviour
 {
@@ -12,8 +13,8 @@ public class RoadController : MonoBehaviour
    [SerializeField] private List<RoadBlock> _roadBlockList = new List<RoadBlock>();
    [SerializeField] private Transform _roadBlockParent;
    [SerializeField] private float _poolingDistance;
+   [SerializeField] private List<GameObject> _natureItemList;
    private RoadBlock _firstRoadBlock;
-
    private void Awake()
    {
       Instance = this;
@@ -26,13 +27,16 @@ public class RoadController : MonoBehaviour
       }
       SetFirstRoadBlock();
    }
-   private void Update()
+  
+
+   private void FixedUpdate()
    {
       if (Vector3.Distance(Vector3.zero,_firstRoadBlock.transform.position)>=_poolingDistance)
       {
          ResetRoadBlock(_firstRoadBlock);
       }
    }
+
    private void ResetRoadBlock(RoadBlock roadBlock)
    {
       roadBlock.gameObject.SetActive(false);
@@ -55,7 +59,12 @@ public class RoadController : MonoBehaviour
    private void CreateRoadBlock()
    {
       var tempBlock = Instantiate(_roadBlockPrefab, GetLastTargetBlock(), Quaternion.identity, _roadBlockParent);
-        tempBlock.GetComponent<RoadBlock>().Init();
+      List<GameObject> tempList = new List<GameObject>();
+      for (int i = 0; i < 4; i++)
+      {
+         tempList.Add(_natureItemList[UnityEngine.Random.Range(0,_natureItemList.Count)]);
+      }
+      tempBlock.GetComponent<RoadBlock>().Init(tempList);
        _roadBlockList.Add(tempBlock);
    }
 

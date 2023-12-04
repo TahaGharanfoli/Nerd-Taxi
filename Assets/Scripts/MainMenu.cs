@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TMPro;
 using UnityEngine;
@@ -48,21 +49,40 @@ public class MainMenu : MonoBehaviour
    {
       if (_userNameInputField.text.Length > 3)
       {
-         StartCoroutine(NetworkManager.Register(_userNameInputField.text, (result) =>
+         if (PlayerPrefs.HasKey("UserId"))
          {
-            _userNameText.text = _userNameInputField.text; 
-            JObject tempData=JObject.Parse(result);
-            string userId = tempData["userId"].ToString();
-            SaveUserId(userId);
-            SaveUserName(_userNameText.text);
-            _changeNamePanel.SetActive(false);
-            print("Register User Id  :  "+userId);
-         }, () => { }));
+            StartCoroutine(NetworkManager.UpdateUserName(GetUserId(), _userNameInputField.text,() =>
+            {
+               _userNameText.text = _userNameInputField.text;
+               SaveUserName(_userNameInputField.text);
+               _changeNamePanel.SetActive(false);
+            }, null));
+         }
+         else
+         {
+
+            StartCoroutine(NetworkManager.Register(_userNameInputField.text, (result) =>
+            {
+               _userNameText.text = _userNameInputField.text;
+               JObject tempData = JObject.Parse(result);
+               string userId = tempData["userId"].ToString();
+               SaveUserId(userId);
+               SaveUserName(_userNameText.text);
+               _changeNamePanel.SetActive(false);
+               print("Register User Id  :  " + userId);
+            }, () => { }));
+         }
       }
    }
+
    private void SaveUserId(string userId)
    {
       PlayerPrefs.SetString("UserId",userId);
+   }
+
+   private string GetUserId()
+   {
+      return PlayerPrefs.GetString("UserId");
    }
 
    private string GetUserName()
@@ -78,15 +98,42 @@ public class MainMenu : MonoBehaviour
    {
       PlayerPrefs.SetString("UserName",userName);
    }
-
    public void OnClickOpenLeaderBoard()
    {
       _leaderBoardPage.SetActive(true);
-      // init data
+      StartCoroutine(NetworkManager.GetLeaderBoard((result) =>
+      {
+         List<LeaderBoardRowData> leaderBoardRowList = JsonConvert.DeserializeObject<List<LeaderBoardRowData>>(result);
+         CreateLeaderBoardRow(leaderBoardRowList);
+         
+      },null));
+   }
+   private void CreateLeaderBoardRow(List<LeaderBoardRowData> leaderBoardList)
+   {
+      if (_leaderBoardRowList.Count>0)
+      {
+         int count = leaderBoardList.Count;
+         for (int i = 0; i < count; i++)
+         {
+            Destroy(_leaderBoardRowList[i].gameObject);
+         }
+         _leaderBoardRowList.Clear();
+      }
+      GameObject tempRow ;
+      int index = 1;
+      foreach (var item in leaderBoardList)
+      {
+         tempRow=Instantiate(_leaderBoardRowPrefab.gameObject, _leaderBoardRowParent);
+         tempRow.GetComponent<LeaderBoardRow>().Init(item.username,index,item.score);
+         _leaderBoardRowList.Add(tempRow);
+         index++;
+      }
    }
 
-   private void CreateLeaderBoardRow()
+   public class LeaderBoardRowData
    {
-      var tempRow = Instantiate(_leaderBoardRowPrefab, _leaderBoardRowParent);
+      public string id;
+      public string username;
+      public int score;
    }
 }

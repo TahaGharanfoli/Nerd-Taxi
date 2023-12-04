@@ -9,6 +9,7 @@ public class RoadBlock : MonoBehaviour
     [SerializeField] private Material _roadMaterial;
    [SerializeField] private float _moveSpeed;
    [SerializeField] public float _zScale;
+   [SerializeField] private List<Transform> _targetPosition;
    private void OnEnable()
    {
        if (GameController.Instance!=null)
@@ -17,8 +18,7 @@ public class RoadBlock : MonoBehaviour
            GameController.OnChangeGameSpeed += OnChangeSpeed;
        }
    }
-
-   private void Start()
+       private void Start()
    {
        _moveSpeed = GameController.Instance.GameSpeed;
    }
@@ -28,10 +28,15 @@ public class RoadBlock : MonoBehaviour
        GameController.OnChangeGameSpeed -= OnChangeSpeed;
    }
 
-   public void Init()
+   public void Init(List<GameObject> items)
    {
        // GameController.OnChangeGameSpeed -= OnChangeSpeed;
        // GameController.OnChangeGameSpeed += OnChangeSpeed;
+       int index = 0;
+       foreach (var target in _targetPosition)
+       {
+           Instantiate(items[0], target);
+       }
    }
    private void OnChangeSpeed(float speed)
    {

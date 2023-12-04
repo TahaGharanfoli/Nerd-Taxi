@@ -16,6 +16,9 @@ public class ViewController : MonoBehaviour
     [SerializeField] private Text _bestPlayerScore;
     [SerializeField] private Text _currentPlayerScore;
     [SerializeField] private GameObject _endPage;
+    [SerializeField] private GameObject _inputPage;
+    [SerializeField] private AudioSource _correctAudio;
+    [SerializeField] private AudioSource _wrongAudio;
     private int _scoreValue = 0;
     private float _healthValue = 1;
     private float _mainDistance;
@@ -28,7 +31,6 @@ public class ViewController : MonoBehaviour
     {
         GameController.OnFindAnswer -= OnFindAnswer;
     }
-
     public void InitFirst()
     {
         _currentTargetQuestion = _questionTransformQueue.Dequeue();
@@ -53,14 +55,19 @@ public class ViewController : MonoBehaviour
         _mainDistance = _currentTargetQuestion.position.z;
         if (isCorrect)
         {
+            _correctAudio.Play();
             _scoreValue++;
             _scoreText.text = $"{_scoreValue}";
-            _healthValue += 0.1f;
+            if (_healthValue < 1)
+            {
+                _healthValue += 0.1f;
+            }
             _healthImage.fillAmount = _healthValue;
-            ControlGameEvent(_scoreValue);
+             ControlGameEvent(_scoreValue);
         }
         else
         {
+            _wrongAudio.Play();
             _healthValue -= 0.3f;
             _healthImage.fillAmount = _healthValue;
             if (_healthValue <= 0)
@@ -89,24 +96,29 @@ public class ViewController : MonoBehaviour
         if (score < _gameEventList[0].Score)
         {
             // default
+            print("first state ");
             return;
         }
         else if (score > _gameEventList[0].Score && score < _gameEventList[1].Score)
         {
-            GameController.OnChangeGameSpeed?.Invoke(_gameEventList[0].GameSpeed);
+            print("second state ");
+            GameController.Instance.ChangeGameSpeed(_gameEventList[0].GameSpeed);
         }
         else if (score > _gameEventList[1].Score && score < _gameEventList[2].Score)
         {
-            GameController.OnChangeGameSpeed?.Invoke(_gameEventList[1].GameSpeed);
+            print("third state ");
+            GameController.Instance.ChangeGameSpeed(_gameEventList[1].GameSpeed);
         }
         else
         {
-            GameController.OnChangeGameSpeed?.Invoke(_gameEventList[3].GameSpeed);
+            print("forth state ");
+            GameController.Instance.ChangeGameSpeed(_gameEventList[2].GameSpeed);
         }
     }
 
     private void ShowEndPage()
     {
+        _inputPage.SetActive(false);
         _endPage.SetActive(true);
         _currentPlayerScore.text = $"{_scoreValue}";
         _bestPlayerScore.text = $"{GetPlayerBestScore()}";
@@ -124,13 +136,19 @@ public class ViewController : MonoBehaviour
         if (GetPlayerBestScore() < score)
         {
             PlayerPrefs.SetInt("BestScore",score);
+            StartCoroutine(NetworkManager.UpdateScore(PlayerPrefs.GetString("UserId"), score, null, null));
         }
-        // set network setting 
     }
     public void OnClickReplay()
     {
         Time.timeScale = 1;
         SceneManager.LoadScene("GameScene");
+    }
+
+    public void OnClickReturnHome()
+    {
+        Time.timeScale = 1;
+        SceneManager.LoadScene("MainMenu");
     }
     [Serializable]
     public class GameEvent

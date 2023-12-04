@@ -13,10 +13,11 @@ public class GameController : MonoBehaviour
      {
         Instance = this;
      }
-     public void ChangeGameSpeed(float delta)
+     public void ChangeGameSpeed(float gameSpeed)
      {
          // GameSpeed += delta;
          // print("Game Speed :  "+GameSpeed);
-         // OnChangeGameSpeed?.Invoke(GameSpeed);
+         GameSpeed = gameSpeed;
+          OnChangeGameSpeed?.Invoke(GameSpeed);
      }
 }

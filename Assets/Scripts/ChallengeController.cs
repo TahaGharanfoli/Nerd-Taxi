@@ -41,16 +41,6 @@ public class ChallengeController : MonoBehaviour
     private void OnFindAnswer(bool isCorrect)
     {
         // print("on find answer ");
-        if (isCorrect)
-        {
-            GameController.Instance.ChangeGameSpeed(0.3f);
-            _currentDelay -= 0.1f;
-        }
-        else
-        {
-            _currentDelay -= 0.2f;
-            GameController.Instance.ChangeGameSpeed(2);
-        }
         ShowNextQuestion();
         SetChallenge();
     }
@@ -70,10 +60,6 @@ public class ChallengeController : MonoBehaviour
             _questionBehaviour.Set(_questionQueue.Dequeue());
         }
     }
-    // private void MakeFirstChallenge()
-    // {
-    //     _questionBehaviour.Set(_currentChallenge);
-    // }
 
     private void CreateBaseAnswers()
     {
@@ -82,7 +68,7 @@ public class ChallengeController : MonoBehaviour
         {
             _currentChallenge = _answerQueue.Dequeue();
              CreateAnswer(_currentChallenge,index);
-             index += 2;
+             index += 3;
              _questionQueue.Enqueue(_currentChallenge);
         }
         _questionBehaviour.Set(_questionQueue.Dequeue());
@@ -108,7 +94,7 @@ public class ChallengeController : MonoBehaviour
         var challenge = _answerQueue.Dequeue();
         if (_answerBlockQueue.Count<3)
         {
-         CreateAnswer(challenge,7);   
+         CreateAnswer(challenge,9);   
         }
         _questionQueue.Enqueue(challenge);
          // CreateAnswer(challenge);
@@ -136,7 +122,7 @@ public class ChallengeController : MonoBehaviour
 
         public Challenge ()
         {
-            Operation=(Operation)Random.Range(0, 4);
+            Operation=(Operation)Random.Range(0, 3);
             FirstNumber = Random.Range(0, 101);
             SecondNumber = Random.Range(0, 101);
             if (Random.Range(0, 2) == 0)
@@ -146,7 +132,7 @@ public class ChallengeController : MonoBehaviour
             }
             else
             {
-                Answer=GenerateWrongAnswer((Operation)Random.Range(0, 4), Random.Range(0, 101), Random.Range(0, 101));
+                Answer=GenerateWrongAnswer((Operation)Random.Range(0, 3), Random.Range(0, 101), Random.Range(0, 101));
                 IsCorrectAnswer = false;
             }
         }
